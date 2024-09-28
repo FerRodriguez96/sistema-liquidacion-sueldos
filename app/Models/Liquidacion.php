@@ -9,10 +9,10 @@ class Liquidacion extends Model
 {
     protected $fillable = ['empleado_id', 'salario_bruto', 'descuento_total', 'bonificacion_total', 'salario_neto'];
 
-    // Relación con empleados: Cada liquidación pertenece a un empleado
-    public function empleado()
+    // Relación con empleados: Cada liquidación pertenece a un usuario
+    public function user()
     {
-        return $this->belongsTo(Empleado::class);
+        return $this->belongsTo(User::class);
     }
 
     // Relación con conceptos de liquidación: Una liquidación puede tener muchos conceptos

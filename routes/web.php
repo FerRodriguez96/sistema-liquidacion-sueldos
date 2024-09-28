@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Models\Empleado;
 use App\Http\Controllers\EmpleadoController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +14,24 @@ use App\Http\Controllers\EmpleadoController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::resource('empleados', EmpleadoController::class);
 
-Route::get('/', [EmpleadoController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Estas rutas deberían estar después de instalar Breeze
+require __DIR__.'/auth.php';
+
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
