@@ -24,6 +24,7 @@ class EmpleadoController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'nombre' => 'required|string',
             'apellido' => 'required|string',
@@ -32,6 +33,7 @@ class EmpleadoController extends Controller
             'salario_base' => 'required|numeric',
             'cargo' => 'required|string',
         ]);
+
         // Guardar un nuevo empleado en la base de datos
         Empleado::create($request->all());
         return redirect()->route('empleados.index');

@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('liquidaciones', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(); // Relación con la tabla empleados
-            $table->decimal('salario_bruto', 8, 2);
-            $table->decimal('descuento', 8, 2);
-            $table->decimal('salario_neto', 8, 2);
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('liquidaciones');
+        Schema::dropIfExists('users');
     }
 };

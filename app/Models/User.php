@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'last_name',
+        'dni',
+        'job_title',
     ];
 
     /**
@@ -42,4 +45,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Relación con las liquidaciones: Un empleado tiene muchas liquidaciones
+    public function liquidaciones()
+    {
+        return $this->hasMany(Liquidacion::class);
+    }
 }
