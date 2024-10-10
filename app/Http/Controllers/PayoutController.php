@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Liquidacion;
+use App\Models\Payout;
 use Illuminate\Http\Request;
 
 class PayoutController extends Controller
@@ -11,53 +11,49 @@ class PayoutController extends Controller
     /**
      * Calcular la liquidación de un empleado.
      */
-    public function calcularLiquidacion(User $user)
+    public function calculatePayout(User $user)
     {
-        $salarioBase = $user->salario_base;
-        $horasExtras = $this->calcularHorasExtras($user);
-        $bonificaciones = $this->calcularBonificaciones($user);
-        $deducciones = $this->calcularDeducciones($user);
+        $baseSalary = $user->base_salary;
+        $extraHours = $this->calculateExtraHours($user);
+        $bonuses = $this->calculateBonuses($user);
+        $deductions = $this->calculateDeductions($user);
 
-        $salarioBruto = $salarioBase + $horasExtras + $bonificaciones;
-        $salarioNeto = $salarioBruto - $deducciones;
+        $grossSalary = $baseSalary + $extraHours + $bonuses;
+        $netSalary = $grossSalary - $deductions;
 
         // Guardar liquidación en la base de datos
-        $liquidacion = Liquidacion::create([
-            'empleado_id' => $user->id,
-            'salario_bruto' => $salarioBruto,
-            'salario_neto' => $salarioNeto,
-            'horas_extras' => $horasExtras,
-            'bonificaciones' => $bonificaciones,
-            'deducciones' => $deducciones,
+        $payout = Payout::create([
+            'user_id' => $user->id,
+            'gross_salary' => $grossSalary,
+            'net_salary' => $netSalary,
+            'total_bonification' => $bonuses,
+            'total_discount' => $deductions,
         ]);
 
-        return view('liquidaciones.show', compact('user', 'salarioNeto', 'liquidacion'));
+        return view('payouts.show', compact('user', 'netSalary', 'payout'));
     }
 
     /**
      * Calcular las horas extras del empleado.
      */
-    protected function calcularHorasExtras(User $user)
+    protected function calculateExtraHours(User $user)
     {
-        //
-        return $user->horas_extras * $user->pago_hora_extra;
+        return $user->extra_hours * $user->extra_hour_rate;
     }
 
     /**
      * Calcular las bonificaciones del empleado.
      */
-    protected function calcularBonificaciones(User $user)
+    protected function calculateBonuses(User $user)
     {
-        //
-        return $user->bonificaciones;
+        return $user->bonuses;
     }
 
     /**
      * Calcular las deducciones del empleado.
      */
-    protected function calcularDeducciones(User $user)
+    protected function calculateDeductions(User $user)
     {
-        //
-        return $user->deducciones;
+        return $user->deductions;
     }
 }

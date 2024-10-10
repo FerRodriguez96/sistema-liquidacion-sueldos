@@ -28,9 +28,14 @@
             <x-input-error class="mt-2" :messages="$errors->get('dni')" />
         </div>
         <div class="mt-4">
-            <x-input-label for="job_title" :value="__('Cargo')" />
-            <x-text-input id="job_title" name="job_title" type="text" class="mt-1 block w-full" :value="old('job_title')" required autocomplete="job_title" />
-            <x-input-error class="mt-2" :messages="$errors->get('job_title')" />
+            <x-input-label for="job_title_id" :value="__('Cargo')" />
+            <select id="job_title_id" name="job_title_id" class="mt-1 block w-full" required>
+                <option value="">Seleccione un cargo</option>
+                @foreach ($jobTitles as $jobTitle)
+                <option value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('job_title_id')" />
         </div>
 
         <!-- Password -->
@@ -38,9 +43,9 @@
             <x-input-label for="password" :value="__('Password')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+                type="password"
+                name="password"
+                required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -50,8 +55,8 @@
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
             <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+                type="password"
+                name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>

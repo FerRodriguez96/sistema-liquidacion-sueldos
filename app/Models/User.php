@@ -22,7 +22,7 @@ class User extends Authenticatable
         'password',
         'last_name',
         'dni',
-        'job_title',
+        'job_title_id', // Ahora hace referencia a la relación con JobTitle
     ];
 
     /**
@@ -48,6 +48,12 @@ class User extends Authenticatable
     // Relación con las liquidaciones: Un empleado tiene muchas liquidaciones
     public function liquidaciones()
     {
-        return $this->hasMany(Liquidacion::class);
+        return $this->hasMany(Payout::class);
+    }
+
+    // Relación con JobTitle: Un usuario tiene un cargo (JobTitle)
+    public function jobTitle()
+    {
+        return $this->belongsTo(JobTitle::class);
     }
 }

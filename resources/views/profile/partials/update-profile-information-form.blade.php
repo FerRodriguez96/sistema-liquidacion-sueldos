@@ -59,9 +59,15 @@
             <x-input-error class="mt-2" :messages="$errors->get('dni')" />
         </div>
         <div>
-            <x-input-label for="job_title" :value="__('Cargo')" />
-            <x-text-input id="job_title" name="job_title" type="text" class="mt-1 block w-full" :value="old('job_title', $user->job_title)" required autofocus autocomplete="job_title" />
-            <x-input-error class="mt-2" :messages="$errors->get('job_title')" />
+            <x-input-label for="job_title_id" :value="__('Cargo')" />
+            <select id="job_title_id" name="job_title_id" class="mt-1 block w-full">
+                @foreach($jobTitles as $jobTitle)
+                    <option value="{{ $jobTitle->id }}" {{ old('job_title_id', $user->job_title_id) == $jobTitle->id ? 'selected' : '' }}>
+                        {{ $jobTitle->name }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('job_title_id')" />
         </div>
 
         <div class="flex items-center gap-4">
