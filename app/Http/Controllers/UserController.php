@@ -17,7 +17,7 @@ class UserController extends Controller
         $users = User::with('jobTitle')->get();
 
         // Retornar la vista 'users' con la lista de usuarios
-        return view('users', compact('users'));
+        return view('users.index', compact('users'));
     }
 
     /**
@@ -73,10 +73,13 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        // Buscar el usuario por su ID
-        $user = User::findOrFail($id);
-        $jobTitles = JobTitle::all(); // Obtener los cargos
+        // Buscar al usuario por su ID junto con su JobTitle
+        $user = User::with('jobTitle')->findOrFail($id);
 
+        // Obtener todos los cargos disponibles
+        $jobTitles = JobTitle::all();
+
+        // Retornar la vista de edición con los datos del usuario y cargos
         return view('users.edit', compact('user', 'jobTitles'));
     }
 
@@ -85,24 +88,30 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validar los datos ingresados
-        $request->validate([
+        // Validar los datos del formulario
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'job_title_id' => 'required|exists:job_titles,id', // Validar que el cargo exista
+            'last_name' => 'required|string|max:255',
+            'dni' => 'required|string|max:255|unique:users,dni,' . $id,  // Asegurar que el DNI sea único excepto para el usuario actual
+            'job_title_id' => 'nullable|exists:job_titles,id',  // Validar que el job_title_id exista en la tabla job_titles
         ]);
-
-        // Actualizar el usuario
+    
+        // Buscar al usuario por ID
         $user = User::findOrFail($id);
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'job_title_id' => $request->job_title_id, // Actualizar el cargo
-        ]);
-
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+    
+        // Asignar los valores del formulario al modelo de usuario
+        $user->name = $validatedData['name'];
+        $user->last_name = $validatedData['last_name'];
+        $user->dni = $validatedData['dni'];
+        $user->job_title_id = $validatedData['job_title_id'];  // Guardar el cargo seleccionado
+    
+        // Guardar los cambios en la base de datos
+        $user->save();
+    
+        // Redirigir a la lista de empleados con un mensaje de éxito
+        return redirect()->route('empleados')->with('success', 'Usuario actualizado correctamente.');
     }
+    
 
     /**
      * Elimina un usuario.

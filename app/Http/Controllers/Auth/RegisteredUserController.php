@@ -21,25 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        // Asegurarse de que los cargos existan o crearlos si no existen
-        $jobTitles = [
-            ['name' => 'Administrador', 'base_salary' => 5000],
-            ['name' => 'Jefe', 'base_salary' => 4000],
-            ['name' => 'Empleado', 'base_salary' => 3000],
-        ];
+        dd('hola2');
 
-        // Insertar los cargos si no existen
-        foreach ($jobTitles as $jobTitle) {
-            JobTitle::firstOrCreate(
-                ['name' => $jobTitle['name']],
-                ['base_salary' => $jobTitle['base_salary']]
-            );
-        }
-
-        // Obtener todos los cargos de la tabla para mostrarlos en la vista
-        $jobTitles = JobTitle::all();
-
-        return view('auth.register', compact('jobTitles'));
+        return view('auth.register');
     }
 
     /**
@@ -52,9 +36,9 @@ class RegisteredUserController extends Controller
         // Validar los datos ingresados
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'dni' => ['required', 'string', 'max:20'],
-            'job_title_id' => ['required', 'exists:job_titles,id'], // Validar que el ID del cargo exista
+            'last_name' => ['required', 'string', 'max:255'], // Asegúrate de incluirlo aquí
+            'dni' => ['required', 'string', 'max:20'], // Puedes ajustar la validación según sea necesario
+            'job_title' => ['required', 'string', 'max:255'], // Igualmente aquí
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -64,7 +48,6 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'last_name' => $request->last_name,
             'dni' => $request->dni,
-            'job_title_id' => $request->job_title_id, // Relacionar el cargo por su ID
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);

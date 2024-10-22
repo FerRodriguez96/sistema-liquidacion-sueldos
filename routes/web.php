@@ -29,6 +29,8 @@ Route::get('/dashboard', function () {
 
 Route::get('/empleados', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('empleados');
 Route::get('/empleados/{id}', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('users.show');
+Route::get('/empleados/{id}/edit', [UserController::class, 'edit'])->middleware(['auth', 'verified'])->name('users.edit');
+Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

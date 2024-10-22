@@ -27,16 +27,9 @@
             <x-text-input id="dni" name="dni" type="text" class="mt-1 block w-full" :value="old('dni')" required autocomplete="dni" />
             <x-input-error class="mt-2" :messages="$errors->get('dni')" />
         </div>
-        <div class="mt-4">
-            <x-input-label for="job_title_id" :value="__('Cargo')" />
-            <select id="job_title_id" name="job_title_id" class="mt-1 block w-full" required>
-                <option value="">Seleccione un cargo</option>
-                @foreach ($jobTitles as $jobTitle)
-                <option value="{{ $jobTitle->id }}">{{ $jobTitle->name }}</option>
-                @endforeach
-            </select>
-            <x-input-error class="mt-2" :messages="$errors->get('job_title_id')" />
-        </div>
+        <x-input-label for="job_title" :value="__('Cargo')" />
+            <x-text-input id="job_title" name="job_title" type="text" class="mt-1 block w-full" :value="old('job_title')" required autocomplete="job_title" />
+            <x-input-error class="mt-2" :messages="$errors->get('job_title')" />
 
         <!-- Password -->
         <div class="mt-4">
