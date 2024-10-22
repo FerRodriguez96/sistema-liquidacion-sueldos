@@ -9,20 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::table('payouts', function (Blueprint $table) {
-            //
-        });
+        Schema::rename('liquidaciones', 'payouts');
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::table('payouts', function (Blueprint $table) {
-            //
-        });
+        Schema::rename('payouts', 'liquidaciones');
     }
+
 };

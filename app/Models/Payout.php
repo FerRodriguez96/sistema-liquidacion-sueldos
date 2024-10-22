@@ -12,22 +12,23 @@ class Payout extends Model
     protected $fillable = [
         'user_id',
         'gross_salary',
-        'total_discount',
-        'total_bonification',
+        'retirement_contribution',
+        'health_contribution',
+        'risk_contribution',
+        'unemployment_contribution',
+        'total_contributions',
         'net_salary',
     ];
 
-    // Relación con usuarios: Cada liquidación pertenece a un usuario
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relación con conceptos de liquidación: Una liquidación puede tener muchos conceptos
-    public function concepts()
+    public function jobTitle()
     {
-        return $this->belongsToMany(Concept::class, 'concept_payouts')
-                    ->withPivot('applied_amount')
-                    ->withTimestamps();
+        return $this->belongsTo(JobTitle::class, 'job_title_id');
     }
+
+    
 }

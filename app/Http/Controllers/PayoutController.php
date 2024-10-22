@@ -2,35 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Payout;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PayoutController extends Controller
 {
-    /**
-     * Calcular la liquidación de un empleado.
-     */
-    public function calculatePayout(User $user)
+    public function store(Request $request)
     {
-        $baseSalary = $user->base_salary;
-        $extraHours = $this->calculateExtraHours($user);
-        $bonuses = $this->calculateBonuses($user);
-        $deductions = $this->calculateDeductions($user);
-
-        $grossSalary = $baseSalary + $extraHours + $bonuses;
-        $netSalary = $grossSalary - $deductions;
-
-        // Guardar liquidación en la base de datos
-        $payout = Payout::create([
-            'user_id' => $user->id,
-            'gross_salary' => $grossSalary,
-            'net_salary' => $netSalary,
-            'total_bonification' => $bonuses,
-            'total_discount' => $deductions,
+        // Validar los datos de la liquidación
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'payout_date' => 'required|date',
         ]);
 
-        return view('payouts.show', compact('user', 'netSalary', 'payout'));
+        // Obtener el usuario y su salario base
+        $user = User::findOrFail($validated['user_id']);
+        $baseSalary = $user->jobTitle->base_salary; // Obtener el salario base del cargo
+
+        // Calcular los aportes usando una función en el controlador
+        $contributions = $this->calculateContributions($baseSalary);
+
+        // Crear la liquidación con los aportes calculados
+        Payout::create([
+            'user_id' => $validated['user_id'],
+            'payout_date' => $validated['payout_date'],
+            'gross_salary' => $baseSalary,
+            'retirement_contribution' => $contributions['retirement'],
+            'health_contribution' => $contributions['health'],
+            'risk_contribution' => $contributions['risk'],
+            'unemployment_contribution' => $contributions['unemployment'],
+            'total_contributions' => $contributions['total'],
+            'net_salary' => $baseSalary - $contributions['total'],
+        ]);
+
+        return redirect()->route('payouts.index')->with('success', 'Liquidación creada correctamente.');
+    }
+
+    // Función para calcular los aportes
+    private function calculateContributions($baseSalary)
+    {
+        $retirementRate = 0.11; // 11% para jubilación
+        $healthRate = 0.03; // 3% para obra social
+        $riskRate = 0.01; // 1% para ART
+        $unemploymentRate = 0.02; // 2% para desempleo
+
+        // Cálculos
+        $retirement = $baseSalary * $retirementRate;
+        $health = $baseSalary * $healthRate;
+        $risk = $baseSalary * $riskRate;
+        $unemployment = $baseSalary * $unemploymentRate;
+        $total = $retirement + $health + $risk + $unemployment;
+
+        return [
+            'retirement' => $retirement,
+            'health' => $health,
+            'risk' => $risk,
+            'unemployment' => $unemployment,
+            'total' => $total,
+        ];
     }
 
     /**

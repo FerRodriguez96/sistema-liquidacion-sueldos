@@ -9,14 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-    {
-        Schema::rename('conceptos_liquidaciones', 'concept_payouts');
-    }
+    public function up(): void
+{
+    Schema::rename('concepto_liquidacion', 'concept_payout_payout');
+}
 
-    public function down()
-    {
-        Schema::rename('concept_payouts', 'conceptos_liquidaciones');
-    }
+public function down(): void
+{
+    Schema::rename('concept_payout_payout', 'concepto_liquidacion');
+}
 
 };
