@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PayoutController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +32,14 @@ Route::get('/empleados', [UserController::class, 'index'])->middleware(['auth', 
 Route::get('/empleados/{id}', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('users.show');
 Route::get('/empleados/{id}/edit', [UserController::class, 'edit'])->middleware(['auth', 'verified'])->name('users.edit');
 Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+
+//Rutas de liquidaciones
+Route::get('/payouts/create/{user}', [PayoutController::class, 'create'])->name('payouts.create');
+Route::post('/payouts/store', [PayoutController::class, 'store'])->name('payouts.store');
+
+Route::get('/payouts/{userId}', [PayoutController::class, 'index'])->name('payouts.index');
+Route::get('/payouts/{userId}/{payoutId}', [PayoutController::class, 'show'])->name('payouts.show');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

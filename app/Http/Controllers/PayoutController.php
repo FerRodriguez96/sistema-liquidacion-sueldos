@@ -8,6 +8,32 @@ use Illuminate\Http\Request;
 
 class PayoutController extends Controller
 {
+    public function create($userId)
+    {
+        // Busca el usuario por su ID
+        $user = User::findOrFail($userId);
+    
+        // Retorna la vista de creación de liquidación con el usuario
+        return view('payouts.create', compact('user'));
+    }
+    
+    // En PayoutController.php
+    public function index($userId)
+    {
+        $user = User::findOrFail($userId);
+        $payouts = Payout::where('user_id', $userId)->get();
+
+        return view('payouts.index', compact('user', 'payouts'));
+    }
+
+    public function show($userId, $payoutId)
+    {
+        $user = User::findOrFail($userId);
+        $payout = Payout::findOrFail($payoutId);
+
+        return view('payouts.show', compact('user', 'payout'));
+    }
+
     public function store(Request $request)
     {
         // Validar los datos de la liquidación
@@ -36,7 +62,7 @@ class PayoutController extends Controller
             'net_salary' => $baseSalary - $contributions['total'],
         ]);
 
-        return redirect()->route('payouts.index')->with('success', 'Liquidación creada correctamente.');
+        return redirect()->route('empleados')->with('success', 'Liquidación creada correctamente.');
     }
 
     // Función para calcular los aportes

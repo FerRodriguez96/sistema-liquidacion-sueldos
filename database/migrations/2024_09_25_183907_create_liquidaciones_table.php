@@ -13,12 +13,18 @@ return new class extends Migration
     {
         Schema::create('liquidaciones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(); // Relación con la tabla empleados
-            $table->decimal('salario_bruto', 8, 2);
-            $table->decimal('descuento', 8, 2);
-            $table->decimal('salario_neto', 8, 2);
+            $table->foreignId('user_id')->constrained('users'); // Relación con la tabla de empleados
+            $table->date('payout_date');
+            $table->decimal('gross_salary', 10, 2);
+            $table->decimal('retirement_contribution', 10, 2);
+            $table->decimal('health_contribution', 10, 2);
+            $table->decimal('risk_contribution', 10, 2);
+            $table->decimal('unemployment_contribution', 10, 2);
+            $table->decimal('total_contributions', 10, 2);
+            $table->decimal('net_salary', 10, 2);
             $table->timestamps();
         });
+        
     }
 
     /**

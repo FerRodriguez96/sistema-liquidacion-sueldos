@@ -11,6 +11,7 @@ class Payout extends Model
 
     protected $fillable = [
         'user_id',
+        'payout_date',
         'gross_salary',
         'retirement_contribution',
         'health_contribution',
