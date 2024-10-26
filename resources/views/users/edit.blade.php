@@ -42,10 +42,10 @@
                 <div class="flex flex-col">
                     <label for="dni" class="mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">DNI</label>
                     <input 
-                        type="text" 
-                        name="dni" 
-                        id="dni" 
-                        value="{{ old('dni', $user->dni) }}" 
+                        type="text"
+                        name="dni"
+                        id="dni"
+                        value="{{ old('dni', $user->dni) }}"
                         class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                     >
                     @error('dni')
