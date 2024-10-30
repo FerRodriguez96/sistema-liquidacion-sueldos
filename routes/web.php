@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\JobTitleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PayoutController;
@@ -27,6 +28,13 @@ require __DIR__.'/auth.php';
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/cargos', [JobTitleController::class, 'index'])->middleware(['auth', 'verified'])->name('cargos.index');
+Route::get('/cargos/crear', [JobTitleController::class, 'create'])->middleware(['auth', 'verified'])->name('cargos.create');
+Route::post('/cargos', [JobTitleController::class, 'store'])->middleware(['auth', 'verified'])->name('cargos.store');
+Route::get('/cargos/{id}/editar', [JobTitleController::class, 'edit'])->middleware(['auth', 'verified'])->name('cargos.edit');
+Route::put('/cargos/{id}', [JobTitleController::class, 'update'])->middleware(['auth', 'verified'])->name('cargos.update');
+
 
 Route::get('/empleados', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('empleados');
 Route::get('/empleados/{id}', [UserController::class, 'show'])->middleware(['auth', 'verified'])->name('users.show');

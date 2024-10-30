@@ -9,7 +9,10 @@ class JobTitle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'base_salary'];
+    protected $fillable = [
+        'name', 
+        'base_salary'
+    ];
 
     // Relación con el modelo User: Un cargo puede ser asignado a muchos usuarios
     public function users()
