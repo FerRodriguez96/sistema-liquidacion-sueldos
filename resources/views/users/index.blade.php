@@ -54,7 +54,7 @@
                                                 <a href="{{ route('users.show', $user->id) }}" class="block text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                                     Ver Detalles
                                                 </a>
-                                                <a href="{{ route('payouts.create', $user->id) }}" class="block text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                <a href="{{ route('liquidaciones.create', $user->id) }}" class="block text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                                     Realizar Liquidación
                                                 </a>
                                             </td>

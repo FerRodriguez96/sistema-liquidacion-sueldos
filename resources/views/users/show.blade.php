@@ -63,7 +63,7 @@
                     <a href="{{ route('users.edit', $user->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                         Editar Empleado
                     </a>
-                    <a href="{{ route('payouts.index', $user->id) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    <a href="{{ route('liquidaciones.index', $user->id) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                         Ver Liquidaciones
                     </a>
                     <a href="{{ route('empleados') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">

@@ -13,28 +13,51 @@
                     <p class="text-gray-300"><strong>Salario Base:</strong> ${{ number_format($user->jobTitle->base_salary, 2) }}</p>
                 </div>
 
-                <!-- Formulario para crear la liquidación -->
+                <!-- Mostrar los conceptos aplicados -->
+                <div class="bg-gray-700 shadow-md rounded p-4 mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Conceptos Aplicados</h2>
+                    <ul class="text-gray-300">
+                        @foreach($concepts as $concept)
+                        <li>
+                            {{ $concept->nombre }} ({{$concept->porcentaje ? $concept->porcentaje . '%' : '$' . number_format($concept->monto_fijo, 2)}})
+                            <input type="hidden" name="concepts[{{ $loop->index }}][id]" value="{{ $concept->id }}">
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+
+
+                <!-- Resumen del cálculo final -->
                 <div class="bg-gray-700 shadow-md rounded p-6">
-                    <h2 class="text-xl font-semibold mb-4 text-white">Confirmar Liquidación</h2>
+                    <h2 class="text-xl font-semibold mb-4 text-white">Resumen de Liquidación</h2>
+                    <p class="text-gray-300"><strong>Salario Final:</strong> ${{ number_format($netSalary ?? 0, 2) }}</p>
 
-                    <form action="{{ route('payouts.store') }}" method="POST">
+                    <!-- Formulario para confirmar la liquidación -->
+                    <form action="{{ route('liquidaciones.store') }}" method="POST">
                         @csrf
-                        <!-- Campo oculto con el ID del usuario -->
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
+                        <input type="hidden" name="payout_date" value="{{ date('Y-m-d') }}">
 
+                        <!-- Añadir sección para seleccionar conceptos -->
                         <div class="mb-4">
-                            <label for="payout_date" class="block text-sm font-medium text-gray-300">Fecha de Liquidación</label>
-                            <input type="date" name="payout_date" id="payout_date"
-                                   class="block w-full mt-1 p-2 border border-gray-600 bg-gray-800 text-white rounded-md" required>
+                            <label for="concepts" class="block text-sm font-medium text-gray-700">Conceptos</label>
+                            @foreach($concepts as $concept)
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" name="concepts[{{ $concept->id }}][id]" value="{{ $concept->id }}" id="concept-{{ $concept->id }}">
+                                <label for="concept-{{ $concept->id }}" class="ml-2">{{ $concept->name }} ({{ $concept->tipo }})</label>
+                                <input type="number" name="concepts[{{ $concept->id }}][monto_aplicado]" placeholder="Monto" class="ml-2 w-32" min="0" step="0.01" required>
+                            </div>
+                            @endforeach
                         </div>
 
-                        <!-- Botón para confirmar la liquidación -->
                         <div class="flex justify-end">
                             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                                 Realizar Liquidación
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

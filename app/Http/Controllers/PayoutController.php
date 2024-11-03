@@ -4,20 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Payout;
 use App\Models\User;
+use App\Models\Concept; // Asegúrate de que este sea el nombre correcto de tu modelo de conceptos
 use Illuminate\Http\Request;
 
 class PayoutController extends Controller
 {
     public function create($userId)
     {
-        // Busca el usuario por su ID
         $user = User::findOrFail($userId);
-    
-        // Retorna la vista de creación de liquidación con el usuario
-        return view('payouts.create', compact('user'));
+        $concepts = Concept::all(); // Asegúrate de usar el modelo correcto aquí
+
+        return view('payouts.create', compact('user', 'concepts'));
     }
-    
-    // En PayoutController.php
+
     public function index($userId)
     {
         $user = User::findOrFail($userId);
@@ -28,10 +27,10 @@ class PayoutController extends Controller
 
     public function show($userId, $payoutId)
     {
-        $user = User::findOrFail($userId);
-        $payout = Payout::findOrFail($payoutId);
+        // Obtener la liquidación con los conceptos relacionados
+        $payout = Payout::with('user', 'concepts')->findOrFail($payoutId);
 
-        return view('payouts.show', compact('user', 'payout'));
+        return view('payouts.show', compact('payout'));
     }
 
     public function store(Request $request)
@@ -40,76 +39,121 @@ class PayoutController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'payout_date' => 'required|date',
+            'concepts' => 'required|array',
+            'concepts.*.id' => 'required|exists:concept_payouts,id', // Asegúrate de usar el nombre correcto de la tabla
+            'concepts.*.monto_aplicado' => 'required|numeric',
         ]);
 
-        // Obtener el usuario y su salario base
         $user = User::findOrFail($validated['user_id']);
-        $baseSalary = $user->jobTitle->base_salary; // Obtener el salario base del cargo
+        $baseSalary = $user->jobTitle->base_salary;
 
-        // Calcular los aportes usando una función en el controlador
-        $contributions = $this->calculateContributions($baseSalary);
-
-        // Crear la liquidación con los aportes calculados
-        Payout::create([
+        // Crear la liquidación
+        $payout = Payout::create([
             'user_id' => $validated['user_id'],
             'payout_date' => $validated['payout_date'],
-            'gross_salary' => $baseSalary,
-            'retirement_contribution' => $contributions['retirement'],
-            'health_contribution' => $contributions['health'],
-            'risk_contribution' => $contributions['risk'],
-            'unemployment_contribution' => $contributions['unemployment'],
-            'total_contributions' => $contributions['total'],
-            'net_salary' => $baseSalary - $contributions['total'],
+            'gross_salary' => $baseSalary, // Puedes calcular esto después si es necesario
+            'net_salary' => 0, // Inicialmente a 0
         ]);
+
+        // Preparar los datos para la tabla pivote
+        $conceptsData = [];
+        foreach ($validated['concepts'] as $concept) {
+            $conceptsData[$concept['id']] = [
+                'monto_aplicado' => $concept['monto_aplicado'],
+            ];
+        }
+
+        // Asociar los conceptos a la liquidación
+        $payout->concepts()->attach($conceptsData);
+
+        // Calcular el salario neto
+        $netSalary = $this->calculateNetSalary($user);
+        $payout->update(['net_salary' => $netSalary]);
 
         return redirect()->route('empleados')->with('success', 'Liquidación creada correctamente.');
     }
 
-    // Función para calcular los aportes
-    private function calculateContributions($baseSalary)
+    private function calculateRemunerative(User $user)
     {
-        $retirementRate = 0.11; // 11% para jubilación
-        $healthRate = 0.03; // 3% para obra social
-        $riskRate = 0.01; // 1% para ART
-        $unemploymentRate = 0.02; // 2% para desempleo
+        // Obtener todos los conceptos de tipo remunerativo
+        $remunerativeConcepts = Concept::where('tipo', 'remunerativo')->get();
 
-        // Cálculos
-        $retirement = $baseSalary * $retirementRate;
-        $health = $baseSalary * $healthRate;
-        $risk = $baseSalary * $riskRate;
-        $unemployment = $baseSalary * $unemploymentRate;
-        $total = $retirement + $health + $risk + $unemployment;
+        $totalRemunerative = 0;
 
-        return [
-            'retirement' => $retirement,
-            'health' => $health,
-            'risk' => $risk,
-            'unemployment' => $unemployment,
-            'total' => $total,
-        ];
+        foreach ($remunerativeConcepts as $concept) {
+            // Calcula el monto según si es un porcentaje o monto fijo
+            $amount = $concept->porcentaje
+                ? $user->jobTitle->base_salary * ($concept->porcentaje / 100)
+                : $concept->monto_fijo;
+
+            $totalRemunerative += $amount;
+        }
+
+        return $totalRemunerative;
     }
 
-    /**
-     * Calcular las horas extras del empleado.
-     */
-    protected function calculateExtraHours(User $user)
+    private function calculateNonRemunerative(User $user)
     {
-        return $user->extra_hours * $user->extra_hour_rate;
+        // Obtener todos los conceptos de tipo no remunerativo
+        $nonRemunerativeConcepts = Concept::where('tipo', 'no_remunerativo')->get();
+
+        $totalNonRemunerative = 0;
+
+        foreach ($nonRemunerativeConcepts as $concept) {
+            // Calcula el monto según si es un porcentaje o monto fijo
+            $amount = $concept->porcentaje
+                ? $user->jobTitle->base_salary * ($concept->porcentaje / 100)
+                : $concept->monto_fijo;
+
+            $totalNonRemunerative += $amount;
+        }
+
+        return $totalNonRemunerative;
     }
 
-    /**
-     * Calcular las bonificaciones del empleado.
-     */
-    protected function calculateBonuses(User $user)
+    private function calculateDeductions(User $user)
     {
-        return $user->bonuses;
+        // Obtener todos los conceptos que son deducciones
+        $deductions = Concept::where('tipo', 'deduccion')->get();
+
+        $totalDeductions = 0;
+
+        foreach ($deductions as $deduction) {
+            // Calcula el monto según si es un porcentaje o monto fijo
+            $amount = $deduction->porcentaje
+                ? $user->jobTitle->base_salary * ($deduction->porcentaje / 100)
+                : $deduction->monto_fijo;
+
+            $totalDeductions += $amount;
+        }
+
+        return $totalDeductions;
     }
 
-    /**
-     * Calcular las deducciones del empleado.
-     */
-    protected function calculateDeductions(User $user)
+    public function calculateExtraHours(User $user)
     {
-        return $user->deductions;
+        $baseRate = $user->jobTitle->base_salary / 160; // Suponiendo 160 horas de trabajo mensual
+        $extraHours = $user->extra_hours;
+
+        // Suponiendo que el `extra_hour_rate` se aplica a las horas extra normales
+        $normalExtraRate = $baseRate * 1.5; // 50% adicional para horas extras
+        return $extraHours * $normalExtraRate;
+    }
+
+    private function calculateGrossSalary(User $user)
+    {
+        $baseSalary = $user->jobTitle->base_salary;
+        $remunerativeTotal = $this->calculateRemunerative($user);
+
+        return $baseSalary + $remunerativeTotal;
+    }
+
+    private function calculateNetSalary(User $user)
+    {
+        $grossSalary = $this->calculateGrossSalary($user);
+        $deductions = $this->calculateDeductions($user);
+        $nonRemunerativeTotal = $this->calculateNonRemunerative($user);
+
+        return $grossSalary - ($deductions + $nonRemunerativeTotal);
     }
 }

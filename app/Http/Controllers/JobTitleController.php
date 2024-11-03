@@ -9,8 +9,8 @@ class JobTitleController extends Controller
 {
     public function index()
     {
-        $jobTiles = JobTitle::all();
-        return view('jobtitles.index', compact('jobTiles'));
+        $jobTitles = JobTitle::all();
+        return view('jobtitles.index', compact('jobTitles'));
     }
 
     public function create()
@@ -30,7 +30,7 @@ class JobTitleController extends Controller
             'base_salary' => $request->base_salary,
         ]);
 
-        return redirect()->route('jobtitles.index')->with('success', 'Cargo creado exitosamente');
+        return redirect()->route('cargos.index')->with('success', 'Cargo creado exitosamente');
     }
 
     public function edit($id)
@@ -52,6 +52,6 @@ class JobTitleController extends Controller
             'base_salary' => $request->base_salary,
         ]);
 
-        return redirect()->route('jobtitles.index')->with('success', 'Cargo actualizado exitosamente');
+        return redirect()->route('cargos.index')->with('success', 'Cargo actualizado exitosamente');
     }
 }
